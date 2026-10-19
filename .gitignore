@@ -53,3 +53,15 @@ dkms.conf
 
 # debug information files
 *.dwo
+
+# Project specific gitignore
+tests/**/generated/
+.claude
+.robotc
+.vscode
+build
+.mcp.json
+AGENTS.md
+build.py
+CLAUDE.md
+robotc.yaml

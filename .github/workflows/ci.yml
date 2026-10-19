@@ -1,0 +1,214 @@
+name: CI
+
+# Builds Bouncing2D and runs every HammerC test runner on Linux and Windows (Debug, with the
+# headless mock window). The test step prints only failing tests (the runners run with --quiet,
+# and ctest shows a runner's output only when it fails).
+# Then, once all tests pass, builds the Release executables with the real SDL3 window, statically
+# linked, and uploads them as the artifacts bouncing2d-linux and bouncing2d-windows.
+# On main, the publish job then replaces the one GitHub release, "latest", with them.
+
+on:
+  push:
+    branches: ["**"]   # branches only: moving the "latest" tag must not start a run
+  pull_request:
+
+jobs:
+  build-and-test:
+    name: ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Linux (gcc)
+            os: ubuntu-latest
+            shell: bash
+          - name: Windows (MinGW-w64 UCRT64 gcc)
+            os: windows-latest
+            shell: msys2 {0}
+    defaults:
+      run:
+        shell: ${{ matrix.shell }}
+
+    steps:
+      - name: Check out Bouncing2D
+        uses: actions/checkout@v4
+
+      # hammerc.py generates the test runners; pinned to the HammerC 1.0.0 commit that
+      # matches include/hammerc.h
+      - name: Check out HammerC
+        uses: actions/checkout@v4
+        with:
+          repository: CrucibleC/HammerC
+          ref: e298cc65c27565666a221e4229ead1e102b5143d
+          path: HammerC
+
+      - name: Install tools (Linux)
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y ninja-build
+
+      - name: Install tools (Windows)
+        if: runner.os == 'Windows'
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: UCRT64
+          update: false
+          install: >-
+            mingw-w64-ucrt-x86_64-gcc
+            mingw-w64-ucrt-x86_64-cmake
+            mingw-w64-ucrt-x86_64-ninja
+            mingw-w64-ucrt-x86_64-python
+
+      - name: Configure
+        # Sanitizers: ASan, LeakSanitizer and UBSan on Linux; UBSan traps on MinGW (no runtimes there)
+        run: >-
+          cmake -S . -B build/ci -G Ninja -DCMAKE_BUILD_TYPE=Debug -DHAMMERC_SCRIPT=HammerC/hammerc.py
+          -DBOUNCING2D_SANITIZE=ON
+
+      - name: Build
+        run: cmake --build build/ci
+
+      # --no-tests=error: fail instead of passing when no test runner was built
+      - name: Test
+        env:
+          ASAN_OPTIONS: detect_leaks=1:abort_on_error=1
+          UBSAN_OPTIONS: print_stacktrace=1
+        run: ctest --test-dir build/ci --output-on-failure --no-tests=error
+
+  # The downloadable executables: Release with the real SDL3 window, everything statically
+  # linked, so they run without installing anything. Only after every test passed.
+  release:
+    name: Release ${{ matrix.name }}
+    needs: build-and-test
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # The oldest available runner: the binary needs a glibc at least as new as the build
+          # machine's (2.35 here), so older is more compatible
+          - name: Linux
+            os: ubuntu-22.04
+            shell: bash
+            artifact: bouncing2d-linux
+          - name: Windows
+            os: windows-latest
+            shell: msys2 {0}
+            artifact: bouncing2d-windows
+    defaults:
+      run:
+        shell: ${{ matrix.shell }}
+
+    steps:
+      - name: Check out Bouncing2D
+        uses: actions/checkout@v4
+
+      # Headers only: SDL loads the display and GPU libraries at runtime (from the user's system),
+      # so the executable doesn't depend on any of them
+      - name: Install tools and SDL build dependencies (Linux)
+        if: runner.os == 'Linux'
+        run: >-
+          sudo apt-get update && sudo apt-get install -y ninja-build
+          libx11-dev libxext-dev libxrandr-dev libxcursor-dev libxfixes-dev libxi-dev libxss-dev libxtst-dev
+          libxkbcommon-dev libwayland-dev wayland-protocols libdecor-0-dev
+          libegl1-mesa-dev libgl1-mesa-dev libgles2-mesa-dev libdrm-dev libgbm-dev
+          libdbus-1-dev libudev-dev
+
+      - name: Install tools (Windows)
+        if: runner.os == 'Windows'
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: UCRT64
+          update: false
+          install: >-
+            mingw-w64-ucrt-x86_64-gcc
+            mingw-w64-ucrt-x86_64-cmake
+            mingw-w64-ucrt-x86_64-ninja
+
+      - name: Configure (Release, SDL3)
+        run: cmake -S . -B build/release -G Ninja -DCMAKE_BUILD_TYPE=Release -DBOUNCING2D_SDL=ON
+
+      - name: Build
+        run: cmake --build build/release --target bouncing2d
+
+      # What the executable needs from the system: on Windows only Windows' own DLLs, on Linux
+      # only glibc (SDL opens the rest itself when it starts)
+      - name: Show runtime dependencies (Linux)
+        if: runner.os == 'Linux'
+        run: ldd build/release/bouncing2d
+
+      - name: Show runtime dependencies (Windows)
+        if: runner.os == 'Windows'
+        run: objdump -p build/release/bouncing2d.exe | grep "DLL Name"
+
+      # The executable with the project's LICENSE and NOTICE, and SDL3's license (it is linked in).
+      # A tarball keeps the executable bit, which artifact zips lose
+      - name: Package (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          mkdir -p stage dist
+          cp build/release/bouncing2d LICENSE NOTICE stage/
+          cp build/release/_deps/sdl3-src/LICENSE.txt stage/LICENSE-SDL3.txt
+          tar -czf dist/bouncing2d-linux-x86_64.tar.gz -C stage .
+
+      - name: Package (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          mkdir -p dist
+          cp build/release/bouncing2d.exe LICENSE NOTICE dist/
+          cp build/release/_deps/sdl3-src/LICENSE.txt dist/LICENSE-SDL3.txt
+
+      - name: Upload the executable
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact }}
+          path: dist/
+          if-no-files-found: error
+
+  # Main only: replaces the one release, "latest", with this build. A release needs a tag, so the
+  # tag "latest" is moved along with it; there is never more than one release or tag
+  publish:
+    name: Publish the latest release
+    needs: release
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write   # create and delete the release and its tag
+    # Two pushes close together: publish one after the other, never interleaved
+    concurrency:
+      group: publish-latest
+      cancel-in-progress: false
+
+    steps:
+      - name: Download the executables
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts   # one folder per artifact: bouncing2d-linux/, bouncing2d-windows/
+
+      - name: Package
+        run: |
+          mkdir release
+          cp artifacts/bouncing2d-linux/bouncing2d-linux-x86_64.tar.gz release/
+          (cd artifacts/bouncing2d-windows &&
+            zip -9 ../../release/bouncing2d-windows-x86_64.zip bouncing2d.exe LICENSE NOTICE LICENSE-SDL3.txt)
+          cp artifacts/bouncing2d-windows/LICENSE artifacts/bouncing2d-windows/NOTICE \
+             artifacts/bouncing2d-windows/LICENSE-SDL3.txt release/
+          ls -l release
+
+      - name: Replace the latest release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          # The old release and its tag go first (nothing to delete on the very first run)
+          gh release delete latest --yes --cleanup-tag || true
+          gh release create latest release/* \
+            --target "$GITHUB_SHA" \
+            --title "Latest build" \
+            --latest \
+            --notes "The newest build of main: commit ${GITHUB_SHA::7}, $(date -u '+%Y-%m-%d %H:%M UTC').
+
+          - **Windows:** unzip \`bouncing2d-windows-x86_64.zip\` and run \`bouncing2d.exe\`.
+          - **Linux:** \`tar -xzf bouncing2d-linux-x86_64.tar.gz\`, then \`./bouncing2d\` (needs an X11 or Wayland desktop, glibc 2.35 or later).
+
+          Nothing to install: everything, SDL3 included, is linked in. Each archive also has LICENSE, NOTICE and SDL3's license (LICENSE-SDL3.txt)."

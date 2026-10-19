@@ -1,0 +1,12 @@
+Bouncing2D
+Copyright 2026 CrucibleC
+
+This product is licensed under the Apache License, Version 2.0.
+See the LICENSE file for the full license text.
+
+This product includes HammerC (include/hammerc.h), used by the tests,
+Copyright 2026 CrucibleC, licensed under the Apache License, Version 2.0.
+
+The released executables include SDL3 (https://libsdl.org), Copyright (C) Sam Lantinga,
+licensed under the zlib license. Its full license text is in LICENSE-SDL3.txt, shipped with
+the executables.
