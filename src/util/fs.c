@@ -206,7 +206,7 @@ status util_fs_append_file(const char* path, const char* text)
     return util_fs_put(path, text, "ab");
 }
 
-status util_fs_read_file(const char* path, borrows massive util_string* into)
+status util_fs_read_file(const char* path, MUTABLE REF util_string* into)
 {
     if (path == NULL)
     {
@@ -279,7 +279,7 @@ status util_fs_remove_folder(const char* path)
     return removed ? STATUS_OK : util_fs_errno_status();
 }
 
-status util_fs_executable_path(borrows massive util_string* into)
+status util_fs_executable_path(MUTABLE REF util_string* into)
 {
     char path[UTIL_FS_PATH_SIZE] = { 0 };
     char_span path_span = char_span_pod(path, sizeof path);
@@ -304,7 +304,7 @@ status util_fs_executable_path(borrows massive util_string* into)
     return util_string_append_span(into, full_path);
 }
 
-status util_fs_executable_folder(borrows massive util_string* into)
+status util_fs_executable_folder(MUTABLE REF util_string* into)
 {
     util_string path = util_string_make("");
     status result = util_fs_executable_path(&path);

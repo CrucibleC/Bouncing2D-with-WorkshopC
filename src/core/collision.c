@@ -5,7 +5,7 @@
 
 #include "workshopc_tags.h"
 
-bool core_collision_resolve_pair(massive const core_spheres_view* spheres, u32 a, u32 b)
+bool core_collision_resolve_pair(REF const core_spheres_view* spheres, u32 a, u32 b)
 {
     assert(core_spheres_view_is_current(spheres));   // a view taken before a resize is stale
     if (a == b || a >= spheres->count || b >= spheres->count)
@@ -62,7 +62,7 @@ bool core_collision_resolve_pair(massive const core_spheres_view* spheres, u32 a
     return true;
 }
 
-bool core_collision_resolve_walls(massive const core_spheres_view* spheres, u32 index, data_bounds bounds)
+bool core_collision_resolve_walls(REF const core_spheres_view* spheres, u32 index, data_bounds bounds)
 {
     assert(core_spheres_view_is_current(spheres));   // a view taken before a resize is stale
     if (index >= spheres->count)

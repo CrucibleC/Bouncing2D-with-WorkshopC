@@ -32,7 +32,7 @@ f32 core_spawn_lattice_max_radius(u32 n, data_bounds bounds)
     return RADIUS_SHARE * side / cast_u32_to_f32(n);
 }
 
-bool core_spawn_lattice(massive const core_spheres_view* spheres, u32 n, data_bounds bounds)
+bool core_spawn_lattice(REF const core_spheres_view* spheres, u32 n, data_bounds bounds)
 {
     assert(core_spheres_view_is_current(spheres));   // a view taken before a resize is stale
     u64 count = cast_u32_to_u64(n) * cast_u32_to_u64(n);

@@ -37,12 +37,12 @@ app_fps_sample app_fps_sample_pod(u64 physics_ns, u64 draw_ns, u64 present_ns, u
 app_fps app_fps_pod(u64 now_ns);
 // Counts one frame that ended at now_ns and took sample; publishes new values once half a second
 // has passed
-void app_fps_frame(borrows massive app_fps* self, u64 now_ns, app_fps_sample sample);
-f32 app_fps_value(massive const app_fps* self);
+void app_fps_frame(MUTABLE REF app_fps* self, u64 now_ns, app_fps_sample sample);
+f32 app_fps_value(REF const app_fps* self);
 // Per-frame averages over the last window
-f32 app_fps_physics_ms(massive const app_fps* self);
-f32 app_fps_draw_ms(massive const app_fps* self);
-f32 app_fps_present_ms(massive const app_fps* self);
-f32 app_fps_steps(massive const app_fps* self);
+f32 app_fps_physics_ms(REF const app_fps* self);
+f32 app_fps_draw_ms(REF const app_fps* self);
+f32 app_fps_present_ms(REF const app_fps* self);
+f32 app_fps_steps(REF const app_fps* self);
 
 #endif // APP_FPS_H

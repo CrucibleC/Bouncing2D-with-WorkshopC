@@ -59,10 +59,10 @@ app_hud app_hud_pod(void);
 
 // A mouse press at (x, y): marks and returns the button under it (each has a few pixels of slack
 // around its triangle), or APP_HUD_BUTTON_NONE
-app_hud_button app_hud_press(borrows massive app_hud* self, massive const app_hud_layout* layout, f32 x, f32 y);
+app_hud_button app_hud_press(MUTABLE REF app_hud* self, REF const app_hud_layout* layout, f32 x, f32 y);
 // The mouse went up: nothing is pressed any more
-void app_hud_release(borrows massive app_hud* self);
-app_hud_button app_hud_pressed(massive const app_hud* self);
+void app_hud_release(MUTABLE REF app_hud* self);
+app_hud_button app_hud_pressed(REF const app_hud* self);
 
 // Writes value with a space between every three digits ("10 000 000") and a closing '\0'.
 // Returns the length without the '\0'; 0 when out is too small (27 chars fit any u64)
@@ -72,7 +72,7 @@ data_rgba app_hud_fps_color(void);
 data_rgba app_hud_button_color(bool pressed);
 
 // Draws the overlay for this frame
-void app_hud_draw(massive const app_hud* self, massive const app_hud_layout* layout, borrows massive core_window* window,
-                  u32 n, u64 bodies, massive const app_fps* fps);
+void app_hud_draw(REF const app_hud* self, REF const app_hud_layout* layout, MUTABLE REF core_window* window,
+                  u32 n, u64 bodies, REF const app_fps* fps);
 
 #endif // APP_HUD_H

@@ -78,7 +78,7 @@ static const char* util_log_short_file(const char* file)
 }
 
 static void util_log_vwrite(util_log_level level, const char* source_file, i32 source_line, const char* format,
-                            borrows va_list args)
+                            MUTABLE va_list args)
 {
     bool to_file = g_log_file_path_span.data[0] != '\0';
     if (format == NULL || level < g_log_min_level || (!g_log_terminal && !to_file))
@@ -158,7 +158,7 @@ status util_log_set_file(const char* path)
 }
 
 // path without its extension: "C:\games\bouncing2d.exe" -> "C:\games\bouncing2d"
-static void util_log_drop_extension(borrows massive util_string* path)
+static void util_log_drop_extension(MUTABLE REF util_string* path)
 {
     const char* chars = util_string_c_str(path);
     size_t length = util_string_length(path);

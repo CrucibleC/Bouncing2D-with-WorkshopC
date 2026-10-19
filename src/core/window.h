@@ -29,7 +29,7 @@ typedef struct core_window_impl core_window_impl;   // free struct, defined by t
 // Must keep its address (the platform window), so it lives behind its own allocation
 typedef struct core_window
 {
-    confined memory_block impl;   // one core_window_impl
+    PRIVATE memory_block impl;   // one core_window_impl
 } core_window;
 
 // The windowing library's setup and teardown (SDL_Init / SDL_Quit), as a subsystem for
@@ -44,25 +44,25 @@ f32 core_window_glyph_size(void);
 core_window core_window_make(const char* title, u32 width, u32 height);
 NO_COPY(core_window);
 NO_MOVE(core_window);
-void core_window_destroy(borrows massive core_window* self);
-core_window core_window_return(borrows massive core_window* self);
-bool core_window_valid(massive const core_window* self);
+void core_window_destroy(MUTABLE REF core_window* self);
+core_window core_window_return(MUTABLE REF core_window* self);
+bool core_window_valid(REF const core_window* self);
 
 // Takes the next input event; false when there is none left this frame
-bool core_window_poll_event(borrows massive core_window* self, initializes massive data_input_event* event);
+bool core_window_poll_event(MUTABLE REF core_window* self, OUTPUT REF data_input_event* event);
 // (0, 0, width, height) of the drawable area
-data_bounds core_window_bounds(massive const core_window* self);
+data_bounds core_window_bounds(REF const core_window* self);
 // The window's clock in nanoseconds: real time, or the mock's fake frame clock
-u64 core_window_time_ns(massive const core_window* self);
+u64 core_window_time_ns(REF const core_window* self);
 
 // Drawing for one frame: clear, draw, then present
-void core_window_clear(borrows massive core_window* self, data_rgba color);
-void core_window_draw_sprites(borrows massive core_window* self, massive const core_sprite_batch_view* sprites);
-void core_window_draw_triangle(borrows massive core_window* self, data_triangle triangle, data_rgba color);
+void core_window_clear(MUTABLE REF core_window* self, data_rgba color);
+void core_window_draw_sprites(MUTABLE REF core_window* self, REF const core_sprite_batch_view* sprites);
+void core_window_draw_triangle(MUTABLE REF core_window* self, data_triangle triangle, data_rgba color);
 // Text at (x, y), its top left; each character is glyph_size * scale pixels square. The text is
 // the characters of the span up to its first '\0' (or its end)
-void core_window_draw_text(borrows massive core_window* self, f32 x, f32 y, f32 scale, char_const_span text,
+void core_window_draw_text(MUTABLE REF core_window* self, f32 x, f32 y, f32 scale, char_const_span text,
                            data_rgba color);
-void core_window_present(borrows massive core_window* self);
+void core_window_present(MUTABLE REF core_window* self);
 
 #endif // CORE_WINDOW_H

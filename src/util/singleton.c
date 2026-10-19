@@ -8,7 +8,7 @@ util_singleton_subsystem util_singleton_subsystem_pod(util_singleton_subsystem_i
     return (util_singleton_subsystem){ .init = init, .shutdown = shutdown, .result = STATUS_INVALID_STATE };
 }
 
-util_singleton_subsystem_span util_singleton_subsystem_span_pod(borrows util_singleton_subsystem* data, size_t size)
+util_singleton_subsystem_span util_singleton_subsystem_span_pod(MUTABLE util_singleton_subsystem* data, size_t size)
 {
     return (util_singleton_subsystem_span){ .data = data, .size = size };
 }

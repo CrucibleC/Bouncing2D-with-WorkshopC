@@ -18,7 +18,7 @@ static const size_t INITIAL_SPRITES = 8;
 static const f32 MIN_RADIUS = 0.75f;
 
 // Makes block hold at least count elements, growing by doubling; never shrinks
-static bool core_sprite_batch_reserve(borrows massive memory_block* block, size_t count)
+static bool core_sprite_batch_reserve(MUTABLE REF memory_block* block, size_t count)
 {
     size_t capacity = memory_block_count(block);
     return count <= capacity || memory_block_resize(block, util_dynamic_array_resize(count, capacity));
@@ -41,7 +41,7 @@ core_sprite_batch core_sprite_batch_make(void)
     };
 }
 
-void core_sprite_batch_destroy(borrows massive core_sprite_batch* self)
+void core_sprite_batch_destroy(MUTABLE REF core_sprite_batch* self)
 {
     memory_block_destroy(&self->indices);
     memory_block_destroy(&self->uv);
@@ -50,13 +50,13 @@ void core_sprite_batch_destroy(borrows massive core_sprite_batch* self)
     self->count = 0;
 }
 
-bool core_sprite_batch_valid(massive const core_sprite_batch* self)
+bool core_sprite_batch_valid(REF const core_sprite_batch* self)
 {
     return memory_block_valid(&self->xy) && memory_block_valid(&self->colors) && memory_block_valid(&self->uv)
         && memory_block_valid(&self->indices);
 }
 
-status core_sprite_batch_status(massive const core_sprite_batch* self)
+status core_sprite_batch_status(REF const core_sprite_batch* self)
 {
     status result = memory_block_status(&self->xy);
     if (result == STATUS_OK)
@@ -74,7 +74,7 @@ status core_sprite_batch_status(massive const core_sprite_batch* self)
     return result;
 }
 
-status core_sprite_batch_prepare(borrows massive core_sprite_batch* self, massive const core_spheres_const_view* spheres)
+status core_sprite_batch_prepare(MUTABLE REF core_sprite_batch* self, REF const core_spheres_const_view* spheres)
 {
     assert(core_spheres_const_view_is_current(spheres));   // a view taken before a resize is stale
     size_t count = spheres->count;
@@ -134,7 +134,7 @@ status core_sprite_batch_prepare(borrows massive core_sprite_batch* self, massiv
     return STATUS_OK;
 }
 
-void core_sprite_batch_update(borrows massive core_sprite_batch* self, massive const core_spheres_const_view* spheres)
+void core_sprite_batch_update(MUTABLE REF core_sprite_batch* self, REF const core_spheres_const_view* spheres)
 {
     assert(core_spheres_const_view_is_current(spheres));   // a view taken before a resize is stale
     f32* restrict xy = memory_block_data(&self->xy);
@@ -165,12 +165,12 @@ void core_sprite_batch_update(borrows massive core_sprite_batch* self, massive c
     }
 }
 
-size_t core_sprite_batch_count(massive const core_sprite_batch* self)
+size_t core_sprite_batch_count(REF const core_sprite_batch* self)
 {
     return self->count;
 }
 
-core_sprite_batch_view core_sprite_batch_get_view(massive const core_sprite_batch* self)
+core_sprite_batch_view core_sprite_batch_get_view(REF const core_sprite_batch* self)
 {
     return core_sprite_batch_view_pod(self->count, memory_block_const_data(&self->xy),
                                       memory_block_const_data(&self->colors), memory_block_const_data(&self->uv),

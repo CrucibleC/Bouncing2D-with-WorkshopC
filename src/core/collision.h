@@ -16,12 +16,12 @@
 // centers (the lighter one moves more) until they just touch, and if they are approaching gives
 // both an elastic bounce, which keeps momentum and kinetic energy. Returns whether they touched;
 // false and no change for a == b or an index >= spheres->count
-bool core_collision_resolve_pair(massive const core_spheres_view* spheres, u32 a, u32 b);
+bool core_collision_resolve_pair(REF const core_spheres_view* spheres, u32 a, u32 b);
 
 // One axis of the wall check for one sphere: position and velocity on that axis, the box's min
 // and max on it. Branchless selects, and static inline so a loop over all spheres (e.g.
 // core_physics_resolve_walls) inlines and vectorizes it. Returns whether the sphere was past a side
-static inline bool core_collision_resolve_axis(borrows massive f32* position, borrows massive f32* velocity,
+static inline bool core_collision_resolve_axis(MUTABLE REF f32* position, MUTABLE REF f32* velocity,
                                                f32 radius, f32 min, f32 max)
 {
     f32 low = min + radius;
@@ -45,6 +45,6 @@ static inline bool core_collision_resolve_axis(borrows massive f32* position, bo
 // velocity on that axis points inward (a sphere already moving inward keeps its speed). A sphere
 // wider than the box ends at max - radius. Returns whether it was past a side; false and no
 // change for an index >= spheres->count
-bool core_collision_resolve_walls(massive const core_spheres_view* spheres, u32 index, data_bounds bounds);
+bool core_collision_resolve_walls(REF const core_spheres_view* spheres, u32 index, data_bounds bounds);
 
 #endif // CORE_COLLISION_H

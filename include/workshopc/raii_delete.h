@@ -22,8 +22,8 @@
 #ifdef WORKSHOPC_PARSING
 
 #define NO_COPY(type)   type type##_copy(const type* self)
-#define NO_MOVE(type)   type type##_move(borrows type* self)
-#define NO_RETURN(type) type type##_return(borrows type* self)
+#define NO_MOVE(type)   type type##_move(MUTABLE type* self)
+#define NO_RETURN(type) type type##_return(MUTABLE type* self)
 
 #else
 

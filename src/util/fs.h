@@ -30,15 +30,15 @@ status util_fs_write_file(const char* path, const char* text);
 status util_fs_append_file(const char* path, const char* text);
 // Replaces into's text with the file's contents. On failure into is unchanged, except when
 // running out of memory while copying the result, which leaves it empty
-status util_fs_read_file(const char* path, borrows massive util_string* into);
+status util_fs_read_file(const char* path, MUTABLE REF util_string* into);
 
 // Replaces into's text with the running executable's full path, e.g. "C:\games\bouncing2d.exe".
 // STATUS_IO_ERROR when the OS can't tell; into is then unchanged
-status util_fs_executable_path(borrows massive util_string* into);
+status util_fs_executable_path(MUTABLE REF util_string* into);
 // Replaces into's text with the folder holding the running executable, without a trailing
 // separator, e.g. "C:\games\bouncing2d". STATUS_IO_ERROR when the OS can't tell; into is then
 // unchanged
-status util_fs_executable_folder(borrows massive util_string* into);
+status util_fs_executable_folder(MUTABLE REF util_string* into);
 
 // Removes a file; STATUS_NOT_FOUND when there is no file at path (also when it is a folder)
 status util_fs_remove_file(const char* path);

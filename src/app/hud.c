@@ -101,7 +101,7 @@ app_hud app_hud_pod(void)
     return (app_hud){ .pressed = APP_HUD_BUTTON_NONE };
 }
 
-app_hud_button app_hud_press(borrows massive app_hud* self, massive const app_hud_layout* layout, f32 x, f32 y)
+app_hud_button app_hud_press(MUTABLE REF app_hud* self, REF const app_hud_layout* layout, f32 x, f32 y)
 {
     app_hud_button button = APP_HUD_BUTTON_NONE;
     if (app_hud_hits(layout->less, x, y))
@@ -124,12 +124,12 @@ app_hud_button app_hud_press(borrows massive app_hud* self, massive const app_hu
     return button;
 }
 
-void app_hud_release(borrows massive app_hud* self)
+void app_hud_release(MUTABLE REF app_hud* self)
 {
     self->pressed = APP_HUD_BUTTON_NONE;
 }
 
-app_hud_button app_hud_pressed(massive const app_hud* self)
+app_hud_button app_hud_pressed(REF const app_hud* self)
 {
     return self->pressed;
 }
@@ -185,8 +185,8 @@ data_rgba app_hud_button_color(bool pressed)
     return data_rgba_pod(200, 200, 200, 255);
 }
 
-void app_hud_draw(massive const app_hud* self, massive const app_hud_layout* layout, borrows massive core_window* window,
-                  u32 n, u64 bodies, massive const app_fps* fps)
+void app_hud_draw(REF const app_hud* self, REF const app_hud_layout* layout, MUTABLE REF core_window* window,
+                  u32 n, u64 bodies, REF const app_fps* fps)
 {
     char text[APP_HUD_TEXT_SIZE] = { 0 };
     char_span text_span = char_span_pod(text, sizeof text);

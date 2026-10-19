@@ -41,7 +41,7 @@ memory_block memory_block_make(size_t count, size_t element_size)
     };
 }
 
-memory_block memory_block_copy(massive const memory_block* self)
+memory_block memory_block_copy(REF const memory_block* self)
 {
     bool usable = self->data != NULL && self->count > 0;
     void* data = NULL;
@@ -61,7 +61,7 @@ memory_block memory_block_copy(massive const memory_block* self)
     };
 }
 
-memory_block memory_block_move(borrows massive memory_block* self)
+memory_block memory_block_move(MUTABLE REF memory_block* self)
 {
     memory_block result = {
         .data = self->data,
@@ -75,7 +75,7 @@ memory_block memory_block_move(borrows massive memory_block* self)
     return result;
 }
 
-void memory_block_destroy(borrows massive memory_block* self)
+void memory_block_destroy(MUTABLE REF memory_block* self)
 {
     free(self->data);
     self->data = NULL;
@@ -83,22 +83,22 @@ void memory_block_destroy(borrows massive memory_block* self)
     self->status = STATUS_INVALID_STATE;
 }
 
-memory_block memory_block_return(borrows massive memory_block* self)
+memory_block memory_block_return(MUTABLE REF memory_block* self)
 {
     return *self;
 }
 
-bool memory_block_valid(massive const memory_block* self)
+bool memory_block_valid(REF const memory_block* self)
 {
     return self->data != NULL;
 }
 
-status memory_block_status(massive const memory_block* self)
+status memory_block_status(REF const memory_block* self)
 {
     return self->status;
 }
 
-bool memory_block_resize(borrows massive memory_block* self, size_t count)
+bool memory_block_resize(MUTABLE REF memory_block* self, size_t count)
 {
     bool usable = count > 0 && memory_block_fits(count, self->element_size);
     size_t old_count = self->data != NULL ? self->count : 0;
@@ -122,22 +122,22 @@ bool memory_block_resize(borrows massive memory_block* self, size_t count)
     return data != NULL;
 }
 
-void* memory_block_data(borrows massive memory_block* self)
+void* memory_block_data(MUTABLE REF memory_block* self)
 {
     return self->data;
 }
 
-const void* memory_block_const_data(massive const memory_block* self)
+const void* memory_block_const_data(REF const memory_block* self)
 {
     return self->data;
 }
 
-size_t memory_block_count(massive const memory_block* self)
+size_t memory_block_count(REF const memory_block* self)
 {
     return self->count;
 }
 
-size_t memory_block_element_size(massive const memory_block* self)
+size_t memory_block_element_size(REF const memory_block* self)
 {
     return self->element_size;
 }

@@ -25,8 +25,8 @@ static size_t core_spheres_stride_for(size_t count)
     return lanes == 0 ? LANE : lanes * LANE;
 }
 
-core_spheres_view core_spheres_view_pod(size_t count, borrows f32* x, borrows f32* y, borrows f32* vx,
-                                        borrows f32* vy, borrows f32* radius, borrows data_rgba* rgba,
+core_spheres_view core_spheres_view_pod(size_t count, MUTABLE f32* x, MUTABLE f32* y, MUTABLE f32* vx,
+                                        MUTABLE f32* vy, MUTABLE f32* radius, MUTABLE data_rgba* rgba,
                                         const u32* generation, u32 taken_at)
 {
     return (core_spheres_view){ .count = count, .x = x, .y = y, .vx = vx, .vy = vy, .radius = radius, .rgba = rgba,
@@ -59,7 +59,7 @@ core_spheres core_spheres_make(size_t count)
     return core_spheres_return(&result);
 }
 
-core_spheres core_spheres_copy(massive const core_spheres* self)
+core_spheres core_spheres_copy(REF const core_spheres* self)
 {
     core_spheres result = {
         .block = memory_block_copy(&self->block),
@@ -75,7 +75,7 @@ core_spheres core_spheres_copy(massive const core_spheres* self)
     return core_spheres_return(&result);
 }
 
-core_spheres core_spheres_move(borrows massive core_spheres* self)
+core_spheres core_spheres_move(MUTABLE REF core_spheres* self)
 {
     core_spheres result = {
         .block = memory_block_move(&self->block),
@@ -90,7 +90,7 @@ core_spheres core_spheres_move(borrows massive core_spheres* self)
     return result;
 }
 
-void core_spheres_destroy(borrows massive core_spheres* self)
+void core_spheres_destroy(MUTABLE REF core_spheres* self)
 {
     memory_block_destroy(&self->block);
     self->count = 0;
@@ -98,22 +98,22 @@ void core_spheres_destroy(borrows massive core_spheres* self)
     self->generation += 1;
 }
 
-core_spheres core_spheres_return(borrows massive core_spheres* self)
+core_spheres core_spheres_return(MUTABLE REF core_spheres* self)
 {
     return *self;
 }
 
-bool core_spheres_valid(massive const core_spheres* self)
+bool core_spheres_valid(REF const core_spheres* self)
 {
     return memory_block_valid(&self->block);
 }
 
-status core_spheres_status(massive const core_spheres* self)
+status core_spheres_status(REF const core_spheres* self)
 {
     return memory_block_status(&self->block);
 }
 
-status core_spheres_resize(borrows massive core_spheres* self, size_t count)
+status core_spheres_resize(MUTABLE REF core_spheres* self, size_t count)
 {
     size_t stride = core_spheres_stride_for(count);
     if (stride == 0)
@@ -138,14 +138,14 @@ status core_spheres_resize(borrows massive core_spheres* self, size_t count)
     return STATUS_OK;
 }
 
-size_t core_spheres_count(massive const core_spheres* self)
+size_t core_spheres_count(REF const core_spheres* self)
 {
     return self->count;
 }
 
 // The arrays sit stride elements apart: x, y, vx, vy, radius (f32), then rgba (data_rgba).
 // Every offset is a multiple of 64 bytes, so each typed pointer is correctly aligned
-core_spheres_view core_spheres_get_view(borrows massive core_spheres* self)
+core_spheres_view core_spheres_get_view(MUTABLE REF core_spheres* self)
 {
     char* base = memory_block_data(&self->block);
     if (base == NULL)
@@ -159,7 +159,7 @@ core_spheres_view core_spheres_get_view(borrows massive core_spheres* self)
                                  &self->generation, self->generation);
 }
 
-core_spheres_const_view core_spheres_get_const_view(massive const core_spheres* self)
+core_spheres_const_view core_spheres_get_const_view(REF const core_spheres* self)
 {
     const char* base = memory_block_const_data(&self->block);
     if (base == NULL)
@@ -174,7 +174,7 @@ core_spheres_const_view core_spheres_get_const_view(massive const core_spheres* 
         &self->generation, self->generation);
 }
 
-bool core_spheres_get(massive const core_spheres* self, size_t index, initializes massive data_sphere* sphere)
+bool core_spheres_get(REF const core_spheres* self, size_t index, OUTPUT REF data_sphere* sphere)
 {
     core_spheres_const_view view = core_spheres_get_const_view(self);
     if (index >= view.count)

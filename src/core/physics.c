@@ -5,7 +5,7 @@
 #include "core/collision.h"
 #include "workshopc_tags.h"
 
-void core_physics_move(massive const core_spheres_view* spheres, f32 dt)
+void core_physics_move(REF const core_spheres_view* spheres, f32 dt)
 {
     assert(core_spheres_view_is_current(spheres));   // a view taken before a resize is stale
     // restrict: the arrays never overlap, so the loop can be vectorized
@@ -21,7 +21,7 @@ void core_physics_move(massive const core_spheres_view* spheres, f32 dt)
     }
 }
 
-size_t core_physics_resolve_walls(massive const core_spheres_view* spheres, data_bounds bounds)
+size_t core_physics_resolve_walls(REF const core_spheres_view* spheres, data_bounds bounds)
 {
     assert(core_spheres_view_is_current(spheres));   // a view taken before a resize is stale
     f32* restrict x = spheres->x;

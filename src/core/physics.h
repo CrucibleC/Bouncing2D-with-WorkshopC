@@ -14,9 +14,9 @@
 // outside the box when drawn). Use a fixed dt, e.g. 1/120 s, for a stable simulation.
 
 // x += vx * dt and y += vy * dt for every sphere; dt in seconds, velocities in units per second
-void core_physics_move(massive const core_spheres_view* spheres, f32 dt);
+void core_physics_move(REF const core_spheres_view* spheres, f32 dt);
 
 // core_collision_resolve_walls for every sphere, in one loop. Returns how many were past a side
-size_t core_physics_resolve_walls(massive const core_spheres_view* spheres, data_bounds bounds);
+size_t core_physics_resolve_walls(REF const core_spheres_view* spheres, data_bounds bounds);
 
 #endif // CORE_PHYSICS_H

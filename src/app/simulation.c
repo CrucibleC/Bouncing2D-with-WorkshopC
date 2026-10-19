@@ -51,24 +51,24 @@ static u32 app_simulation_next_n(app_hud_button button, u32 n)
     return app_simulation_clamp_n(cast_u64_to_u32(next));
 }
 
-static f32 app_simulation_width(massive const app_simulation* self)
+static f32 app_simulation_width(REF const app_simulation* self)
 {
     return self->bounds.max_x - self->bounds.min_x;
 }
 
 // Grid cells for the current spheres and bounds
-static status app_simulation_size_grid(borrows massive app_simulation* self)
+static status app_simulation_size_grid(MUTABLE REF app_simulation* self)
 {
     u32 columns = 0;
     u32 rows = 0;
-    core_grid_size_for(core_spheres_count(&self->spheres), self->bounds, 2.0f * self->radius, overwrite(&columns),
-                       overwrite(&rows));
+    core_grid_size_for(core_spheres_count(&self->spheres), self->bounds, 2.0f * self->radius, OUT(&columns),
+                       OUT(&rows));
     return core_grid_resize(&self->grid, columns, rows);
 }
 
 // Spawns an n x n lattice into the spheres (which must hold n * n), then readies the vertex
 // buffers and the grid for them
-static status app_simulation_fill(borrows massive app_simulation* self, u32 n)
+static status app_simulation_fill(MUTABLE REF app_simulation* self, u32 n)
 {
     core_spheres_view view = core_spheres_get_view(&self->spheres);
     if (!core_spawn_lattice(&view, n, self->bounds))
@@ -87,7 +87,7 @@ static status app_simulation_fill(borrows massive app_simulation* self, u32 n)
 
 // One fixed physics step: move, sphere pairs through the grid, then walls (last, so nothing is
 // drawn outside the window)
-static void app_simulation_step(borrows massive app_simulation* self)
+static void app_simulation_step(MUTABLE REF app_simulation* self)
 {
     u64 start = util_clock_ns();
     core_spheres_view view = core_spheres_get_view(&self->spheres);
@@ -134,24 +134,24 @@ app_simulation app_simulation_make(u32 n, data_bounds bounds)
     return app_simulation_return(&result);
 }
 
-void app_simulation_destroy(borrows massive app_simulation* self)
+void app_simulation_destroy(MUTABLE REF app_simulation* self)
 {
     core_sprite_batch_destroy(&self->sprites);
     core_grid_destroy(&self->grid);
     core_spheres_destroy(&self->spheres);
 }
 
-app_simulation app_simulation_return(borrows massive app_simulation* self)
+app_simulation app_simulation_return(MUTABLE REF app_simulation* self)
 {
     return *self;
 }
 
-bool app_simulation_valid(massive const app_simulation* self)
+bool app_simulation_valid(REF const app_simulation* self)
 {
     return core_spheres_valid(&self->spheres) && core_grid_valid(&self->grid) && core_sprite_batch_valid(&self->sprites);
 }
 
-status app_simulation_status(massive const app_simulation* self)
+status app_simulation_status(REF const app_simulation* self)
 {
     status result = core_spheres_status(&self->spheres);
     if (result == STATUS_OK)
@@ -165,7 +165,7 @@ status app_simulation_status(massive const app_simulation* self)
     return result;
 }
 
-void app_simulation_handle_event(borrows massive app_simulation* self, data_input_event event)
+void app_simulation_handle_event(MUTABLE REF app_simulation* self, data_input_event event)
 {
     switch (event.kind)
     {
@@ -198,7 +198,7 @@ void app_simulation_handle_event(borrows massive app_simulation* self, data_inpu
     }
 }
 
-status app_simulation_apply_request(borrows massive app_simulation* self)
+status app_simulation_apply_request(MUTABLE REF app_simulation* self)
 {
     if (self->requested_n == self->n)
     {
@@ -227,7 +227,7 @@ status app_simulation_apply_request(borrows massive app_simulation* self)
     return result;
 }
 
-void app_simulation_advance(borrows massive app_simulation* self, f64 seconds)
+void app_simulation_advance(MUTABLE REF app_simulation* self, f64 seconds)
 {
     self->unsimulated_seconds += seconds > 0.0 ? seconds : 0.0;
     u32 steps = 0;
@@ -245,7 +245,7 @@ void app_simulation_advance(borrows massive app_simulation* self, f64 seconds)
 }
 
 // Everything drawn for one frame, without presenting it
-static void app_simulation_draw(borrows massive app_simulation* self, borrows massive core_window* window)
+static void app_simulation_draw(MUTABLE REF app_simulation* self, MUTABLE REF core_window* window)
 {
     core_window_clear(window, data_rgba_pod(16, 16, 24, 255));
     // After a failed prepare (out of memory) the batch still holds the old count: draw no stale
@@ -263,10 +263,10 @@ static void app_simulation_draw(borrows massive app_simulation* self, borrows ma
 }
 
 // Handles every waiting event; false once a quit came
-static bool app_simulation_poll(borrows massive app_simulation* self, borrows massive core_window* window)
+static bool app_simulation_poll(MUTABLE REF app_simulation* self, MUTABLE REF core_window* window)
 {
     data_input_event event = data_input_event_pod(DATA_INPUT_NONE, 0.0f, 0.0f);
-    while (core_window_poll_event(window, overwrite(&event)))
+    while (core_window_poll_event(window, OUT(&event)))
     {
         app_simulation_handle_event(self, event);
     }
@@ -274,7 +274,7 @@ static bool app_simulation_poll(borrows massive app_simulation* self, borrows ma
 }
 
 // Seconds on the window's clock since the previous frame; 0 for the first
-static f64 app_simulation_elapsed_seconds(borrows massive app_simulation* self, u64 now_ns)
+static f64 app_simulation_elapsed_seconds(MUTABLE REF app_simulation* self, u64 now_ns)
 {
     if (self->frames == 0)
     {
@@ -287,7 +287,7 @@ static f64 app_simulation_elapsed_seconds(borrows massive app_simulation* self, 
 
 // The physics for seconds of time, then now and then a reorder by grid cell (colors follow their
 // spheres, so the vertex buffers are rebuilt)
-static void app_simulation_simulate(borrows massive app_simulation* self, f64 seconds)
+static void app_simulation_simulate(MUTABLE REF app_simulation* self, f64 seconds)
 {
     app_simulation_advance(self, seconds);
     if (self->frames % SORT_EVERY_FRAMES == SORT_EVERY_FRAMES - 1)
@@ -301,7 +301,7 @@ static void app_simulation_simulate(borrows massive app_simulation* self, f64 se
     }
 }
 
-bool app_simulation_frame(borrows massive app_simulation* self, borrows massive core_window* window)
+bool app_simulation_frame(MUTABLE REF app_simulation* self, MUTABLE REF core_window* window)
 {
     // Closing: no point stepping or drawing a frame nobody will see
     if (!app_simulation_poll(self, window))
@@ -334,52 +334,52 @@ bool app_simulation_frame(borrows massive app_simulation* self, borrows massive 
     return true;
 }
 
-u32 app_simulation_n(massive const app_simulation* self)
+u32 app_simulation_n(REF const app_simulation* self)
 {
     return self->n;
 }
 
-u32 app_simulation_requested_n(massive const app_simulation* self)
+u32 app_simulation_requested_n(REF const app_simulation* self)
 {
     return self->requested_n;
 }
 
-size_t app_simulation_count(massive const app_simulation* self)
+size_t app_simulation_count(REF const app_simulation* self)
 {
     return core_spheres_count(&self->spheres);
 }
 
-data_bounds app_simulation_bounds(massive const app_simulation* self)
+data_bounds app_simulation_bounds(REF const app_simulation* self)
 {
     return self->bounds;
 }
 
-app_hud_button app_simulation_pressed(massive const app_simulation* self)
+app_hud_button app_simulation_pressed(REF const app_simulation* self)
 {
     return app_hud_pressed(&self->hud);
 }
 
-u64 app_simulation_frames(massive const app_simulation* self)
+u64 app_simulation_frames(REF const app_simulation* self)
 {
     return self->frames;
 }
 
-u64 app_simulation_steps(massive const app_simulation* self)
+u64 app_simulation_steps(REF const app_simulation* self)
 {
     return self->steps;
 }
 
-u64 app_simulation_step_ns(massive const app_simulation* self)
+u64 app_simulation_step_ns(REF const app_simulation* self)
 {
     return self->step_ns;
 }
 
-bool app_simulation_quit_requested(massive const app_simulation* self)
+bool app_simulation_quit_requested(REF const app_simulation* self)
 {
     return self->quit;
 }
 
-core_spheres_const_view app_simulation_spheres(massive const app_simulation* self)
+core_spheres_const_view app_simulation_spheres(REF const app_simulation* self)
 {
     return core_spheres_get_const_view(&self->spheres);
 }

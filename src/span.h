@@ -21,7 +21,7 @@ typedef struct char_const_span
 } char_const_span;
 
 // { .data = data, .size = size }
-char_span char_span_pod(borrows char* data, size_t size);
+char_span char_span_pod(MUTABLE char* data, size_t size);
 // The same chars, read-only
 char_const_span char_const_span_pod(char_span from);
 
@@ -38,7 +38,7 @@ typedef struct u32_const_span
 } u32_const_span;
 
 // { .data = data, .size = size }
-u32_span u32_span_pod(borrows u32* data, size_t size);
+u32_span u32_span_pod(MUTABLE u32* data, size_t size);
 // { .data = data, .size = size }
 u32_const_span u32_const_span_pod(const u32* data, size_t size);
 

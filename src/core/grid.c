@@ -29,7 +29,7 @@ static u32 core_grid_cell_of(f32 value, f32 min, f32 cells_per_unit, u32 cells)
 }
 
 // Makes block hold at least count elements, growing by doubling; never shrinks
-static bool core_grid_reserve(borrows massive memory_block* block, size_t count)
+static bool core_grid_reserve(MUTABLE REF memory_block* block, size_t count)
 {
     size_t capacity = memory_block_count(block);
     return count <= capacity || memory_block_resize(block, util_dynamic_array_resize(count, capacity));
@@ -49,7 +49,7 @@ core_grid core_grid_make(u32 columns, u32 rows)
     };
 }
 
-core_grid core_grid_copy(massive const core_grid* self)
+core_grid core_grid_copy(REF const core_grid* self)
 {
     return (core_grid){
         .cell_starts = memory_block_copy(&self->cell_starts),
@@ -61,7 +61,7 @@ core_grid core_grid_copy(massive const core_grid* self)
     };
 }
 
-core_grid core_grid_move(borrows massive core_grid* self)
+core_grid core_grid_move(MUTABLE REF core_grid* self)
 {
     return (core_grid){
         .cell_starts = memory_block_move(&self->cell_starts),
@@ -73,7 +73,7 @@ core_grid core_grid_move(borrows massive core_grid* self)
     };
 }
 
-void core_grid_destroy(borrows massive core_grid* self)
+void core_grid_destroy(MUTABLE REF core_grid* self)
 {
     memory_block_destroy(&self->sort_scratch);
     memory_block_destroy(&self->sphere_cells);
@@ -81,13 +81,13 @@ void core_grid_destroy(borrows massive core_grid* self)
     memory_block_destroy(&self->cell_starts);
 }
 
-bool core_grid_valid(massive const core_grid* self)
+bool core_grid_valid(REF const core_grid* self)
 {
     return memory_block_valid(&self->cell_starts) && memory_block_valid(&self->entries)
         && memory_block_valid(&self->sphere_cells) && memory_block_valid(&self->sort_scratch);
 }
 
-status core_grid_status(massive const core_grid* self)
+status core_grid_status(REF const core_grid* self)
 {
     status result = memory_block_status(&self->cell_starts);
     if (result == STATUS_OK)
@@ -105,7 +105,7 @@ status core_grid_status(massive const core_grid* self)
     return result;
 }
 
-status core_grid_resize(borrows massive core_grid* self, u32 columns, u32 rows)
+status core_grid_resize(MUTABLE REF core_grid* self, u32 columns, u32 rows)
 {
     u32 safe_columns = core_grid_at_least_one(columns);
     u32 safe_rows = core_grid_at_least_one(rows);
@@ -118,18 +118,18 @@ status core_grid_resize(borrows massive core_grid* self, u32 columns, u32 rows)
     return STATUS_OK;
 }
 
-u32 core_grid_columns(massive const core_grid* self)
+u32 core_grid_columns(REF const core_grid* self)
 {
     return self->columns;
 }
 
-u32 core_grid_rows(massive const core_grid* self)
+u32 core_grid_rows(REF const core_grid* self)
 {
     return self->rows;
 }
 
-void core_grid_size_for(size_t count, data_bounds bounds, f32 max_diameter, initializes massive u32* columns,
-                        initializes massive u32* rows)
+void core_grid_size_for(size_t count, data_bounds bounds, f32 max_diameter, OUTPUT REF u32* columns,
+                        OUTPUT REF u32* rows)
 {
     *columns = 1;
     *rows = 1;
@@ -154,7 +154,7 @@ void core_grid_size_for(size_t count, data_bounds bounds, f32 max_diameter, init
 
 // Counting sort: afterwards cell c's spheres are entries[starts[c] .. starts[c + 1]), and each
 // sphere's cell range is in sphere_cells. Returns false when a buffer couldn't grow
-static bool core_grid_bin(borrows massive core_grid* self, massive const core_spheres_view* spheres,
+static bool core_grid_bin(MUTABLE REF core_grid* self, REF const core_spheres_view* spheres,
                           data_bounds bounds)
 {
     size_t count = spheres->count;
@@ -233,7 +233,7 @@ static bool core_grid_bin(borrows massive core_grid* self, massive const core_sp
     return true;
 }
 
-size_t core_grid_resolve_pairs(borrows massive core_grid* self, massive const core_spheres_view* spheres,
+size_t core_grid_resolve_pairs(MUTABLE REF core_grid* self, REF const core_spheres_view* spheres,
                                data_bounds bounds)
 {
     assert(core_spheres_view_is_current(spheres));   // a view taken before a resize is stale
@@ -281,7 +281,7 @@ size_t core_grid_resolve_pairs(borrows massive core_grid* self, massive const co
 }
 
 // values[i] = old values[order[i]], through scratch
-static void core_grid_permute_f32(borrows f32* values, borrows f32* scratch, const u32* order, size_t count)
+static void core_grid_permute_f32(MUTABLE f32* values, MUTABLE f32* scratch, const u32* order, size_t count)
 {
     if (values == NULL || scratch == NULL || order == NULL)
     {
@@ -295,7 +295,7 @@ static void core_grid_permute_f32(borrows f32* values, borrows f32* scratch, con
 }
 
 // The same for colors; the scratch bytes simply take data_rgba values this time
-static void core_grid_permute_rgba(borrows data_rgba* values, borrows data_rgba* scratch, const u32* order,
+static void core_grid_permute_rgba(MUTABLE data_rgba* values, MUTABLE data_rgba* scratch, const u32* order,
                                    size_t count)
 {
     if (values == NULL || scratch == NULL || order == NULL)
@@ -309,7 +309,7 @@ static void core_grid_permute_rgba(borrows data_rgba* values, borrows data_rgba*
     (void)memcpy(values, scratch, count * sizeof(data_rgba));
 }
 
-bool core_grid_sort_spheres(borrows massive core_grid* self, massive const core_spheres_view* spheres,
+bool core_grid_sort_spheres(MUTABLE REF core_grid* self, REF const core_spheres_view* spheres,
                             data_bounds bounds)
 {
     assert(core_spheres_view_is_current(spheres));   // a view taken before a resize is stale

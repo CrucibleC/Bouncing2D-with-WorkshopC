@@ -20,6 +20,6 @@ f32 core_spawn_lattice_min_radius_share(void);
 // cell. Each gets a random radius from min share to 1 times core_spawn_lattice_max_radius, a random
 // direction with a speed of 0.5 to 2 cells per second (so motion slows as n grows) and a random
 // color with alpha 255. Returns false, and writes nothing, unless spheres->count == n * n and n > 0
-bool core_spawn_lattice(massive const core_spheres_view* spheres, u32 n, data_bounds bounds);
+bool core_spawn_lattice(REF const core_spheres_view* spheres, u32 n, data_bounds bounds);
 
 #endif // CORE_SPAWN_H

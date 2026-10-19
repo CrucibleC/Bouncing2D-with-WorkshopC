@@ -7,7 +7,7 @@
 #include "workshopc_tags.h"
 
 // Makes room for added more chars plus the '\0', growing through util_dynamic_array_resize
-static status util_string_grow(borrows massive util_string* self, size_t added)
+static status util_string_grow(MUTABLE REF util_string* self, size_t added)
 {
     if (!memory_block_valid(&self->chars))
     {
@@ -27,7 +27,7 @@ static status util_string_grow(borrows massive util_string* self, size_t added)
 }
 
 // Copies count chars to the end and terminates; call only after util_string_grow succeeded
-static void util_string_put(borrows massive util_string* self, const char* source, size_t count)
+static void util_string_put(MUTABLE REF util_string* self, const char* source, size_t count)
 {
     char* chars = memory_block_data(&self->chars);
     if (chars == NULL || source == NULL)
@@ -51,7 +51,7 @@ util_string util_string_make(const char* text)
     return util_string_return(&result);
 }
 
-util_string util_string_copy(massive const util_string* self)
+util_string util_string_copy(REF const util_string* self)
 {
     util_string result = {
         .chars = memory_block_copy(&self->chars),
@@ -64,7 +64,7 @@ util_string util_string_copy(massive const util_string* self)
     return util_string_return(&result);
 }
 
-util_string util_string_move(borrows massive util_string* self)
+util_string util_string_move(MUTABLE REF util_string* self)
 {
     util_string result = {
         .chars = memory_block_move(&self->chars),
@@ -74,28 +74,28 @@ util_string util_string_move(borrows massive util_string* self)
     return result;
 }
 
-void util_string_destroy(borrows massive util_string* self)
+void util_string_destroy(MUTABLE REF util_string* self)
 {
     memory_block_destroy(&self->chars);
     self->length = 0;
 }
 
-util_string util_string_return(borrows massive util_string* self)
+util_string util_string_return(MUTABLE REF util_string* self)
 {
     return *self;
 }
 
-bool util_string_valid(massive const util_string* self)
+bool util_string_valid(REF const util_string* self)
 {
     return memory_block_valid(&self->chars);
 }
 
-status util_string_status(massive const util_string* self)
+status util_string_status(REF const util_string* self)
 {
     return memory_block_status(&self->chars);
 }
 
-status util_string_append(borrows massive util_string* self, const char* text)
+status util_string_append(MUTABLE REF util_string* self, const char* text)
 {
     if (text == NULL)
     {
@@ -110,7 +110,7 @@ status util_string_append(borrows massive util_string* self, const char* text)
     return result;
 }
 
-status util_string_append_string(borrows massive util_string* self, massive const util_string* other)
+status util_string_append_string(MUTABLE REF util_string* self, REF const util_string* other)
 {
     size_t added = other->length;
     status result = util_string_grow(self, added);
@@ -122,7 +122,7 @@ status util_string_append_string(borrows massive util_string* self, massive cons
     return result;
 }
 
-status util_string_append_span(borrows massive util_string* self, char_const_span chars)
+status util_string_append_span(MUTABLE REF util_string* self, char_const_span chars)
 {
     if (chars.data == NULL && chars.size > 0)
     {
@@ -139,7 +139,7 @@ status util_string_append_span(borrows massive util_string* self, char_const_spa
     return result;
 }
 
-void util_string_truncate(borrows massive util_string* self, size_t length)
+void util_string_truncate(MUTABLE REF util_string* self, size_t length)
 {
     char* chars = memory_block_data(&self->chars);
     if (chars == NULL || length >= self->length)
@@ -150,7 +150,7 @@ void util_string_truncate(borrows massive util_string* self, size_t length)
     self->length = length;
 }
 
-void util_string_clear(borrows massive util_string* self)
+void util_string_clear(MUTABLE REF util_string* self)
 {
     char* chars = memory_block_data(&self->chars);
     if (chars)
@@ -160,17 +160,17 @@ void util_string_clear(borrows massive util_string* self)
     self->length = 0;
 }
 
-size_t util_string_length(massive const util_string* self)
+size_t util_string_length(REF const util_string* self)
 {
     return self->length;
 }
 
-size_t util_string_capacity(massive const util_string* self)
+size_t util_string_capacity(REF const util_string* self)
 {
     return memory_block_count(&self->chars);
 }
 
-const char* util_string_c_str(massive const util_string* self)
+const char* util_string_c_str(REF const util_string* self)
 {
     const char* chars = memory_block_const_data(&self->chars);
     return chars ? chars : "";

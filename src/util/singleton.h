@@ -40,7 +40,7 @@ typedef struct util_singleton_subsystem_span
 } util_singleton_subsystem_span;
 
 // { .data = data, .size = size }
-util_singleton_subsystem_span util_singleton_subsystem_span_pod(borrows util_singleton_subsystem* data, size_t size);
+util_singleton_subsystem_span util_singleton_subsystem_span_pod(MUTABLE util_singleton_subsystem* data, size_t size);
 
 // Starts the subsystems first to last, storing each one's result, and stops at the first that
 // fails (later ones may depend on it): those after it stay STATUS_INVALID_STATE. Returns STATUS_OK,

@@ -31,12 +31,12 @@ struct core_window_impl
     u32 height;
 };
 
-static core_window_impl* core_window_get_impl(borrows massive core_window* self)
+static core_window_impl* core_window_get_impl(MUTABLE REF core_window* self)
 {
     return memory_block_data(&self->impl);
 }
 
-static const core_window_impl* core_window_get_const_impl(massive const core_window* self)
+static const core_window_impl* core_window_get_const_impl(REF const core_window* self)
 {
     return memory_block_const_data(&self->impl);
 }
@@ -82,7 +82,7 @@ static SDL_FColor core_window_sdl_color(data_rgba color)
 }
 
 // Reads the drawable size in pixels into impl->width and impl->height
-static void core_window_sdl_read_size(borrows massive core_window_impl* impl)
+static void core_window_sdl_read_size(MUTABLE REF core_window_impl* impl)
 {
     int width = 0;
     int height = 0;
@@ -163,7 +163,7 @@ core_window core_window_make(const char* title, u32 width, u32 height)
     return core_window_return(&result);
 }
 
-void core_window_destroy(borrows massive core_window* self)
+void core_window_destroy(MUTABLE REF core_window* self)
 {
     core_window_impl* impl = core_window_get_impl(self);
     if (impl != NULL)
@@ -184,18 +184,18 @@ void core_window_destroy(borrows massive core_window* self)
     memory_block_destroy(&self->impl);
 }
 
-core_window core_window_return(borrows massive core_window* self)
+core_window core_window_return(MUTABLE REF core_window* self)
 {
     return *self;
 }
 
-bool core_window_valid(massive const core_window* self)
+bool core_window_valid(REF const core_window* self)
 {
     return memory_block_valid(&self->impl);
 }
 
 // The neutral event for an SDL event; DATA_INPUT_NONE for events the app doesn't use
-static data_input_event core_window_sdl_translate(borrows massive core_window_impl* impl, SDL_Event* event)
+static data_input_event core_window_sdl_translate(MUTABLE REF core_window_impl* impl, SDL_Event* event)
 {
     switch (event->type)
     {
@@ -233,7 +233,7 @@ static data_input_event core_window_sdl_translate(borrows massive core_window_im
     return data_input_event_pod(DATA_INPUT_NONE, 0.0f, 0.0f);
 }
 
-bool core_window_poll_event(borrows massive core_window* self, initializes massive data_input_event* event)
+bool core_window_poll_event(MUTABLE REF core_window* self, OUTPUT REF data_input_event* event)
 {
     *event = data_input_event_pod(DATA_INPUT_NONE, 0.0f, 0.0f);
     core_window_impl* impl = core_window_get_impl(self);
@@ -255,7 +255,7 @@ bool core_window_poll_event(borrows massive core_window* self, initializes massi
     return false;
 }
 
-data_bounds core_window_bounds(massive const core_window* self)
+data_bounds core_window_bounds(REF const core_window* self)
 {
     const core_window_impl* impl = core_window_get_const_impl(self);
     if (impl == NULL)
@@ -265,13 +265,13 @@ data_bounds core_window_bounds(massive const core_window* self)
     return data_bounds_pod(0.0f, 0.0f, cast_u32_to_f32(impl->width), cast_u32_to_f32(impl->height));
 }
 
-u64 core_window_time_ns(massive const core_window* self)
+u64 core_window_time_ns(REF const core_window* self)
 {
     (void)self;
     return SDL_GetTicksNS();
 }
 
-void core_window_clear(borrows massive core_window* self, data_rgba color)
+void core_window_clear(MUTABLE REF core_window* self, data_rgba color)
 {
     core_window_impl* impl = core_window_get_impl(self);
     if (impl != NULL)
@@ -281,7 +281,7 @@ void core_window_clear(borrows massive core_window* self, data_rgba color)
     }
 }
 
-void core_window_draw_sprites(borrows massive core_window* self, massive const core_sprite_batch_view* sprites)
+void core_window_draw_sprites(MUTABLE REF core_window* self, REF const core_sprite_batch_view* sprites)
 {
     core_window_impl* impl = core_window_get_impl(self);
     // core_sprite_batch_prepare keeps count <= INT32_MAX / 4, so the counts below fit an int
@@ -298,7 +298,7 @@ void core_window_draw_sprites(borrows massive core_window* self, massive const c
                                 indices, cast_size_t_to_i32(sizeof(u32)));
 }
 
-void core_window_draw_triangle(borrows massive core_window* self, data_triangle triangle, data_rgba color)
+void core_window_draw_triangle(MUTABLE REF core_window* self, data_triangle triangle, data_rgba color)
 {
     core_window_impl* impl = core_window_get_impl(self);
     if (impl == NULL)
@@ -314,7 +314,7 @@ void core_window_draw_triangle(borrows massive core_window* self, data_triangle 
     (void)SDL_RenderGeometry(impl->renderer, NULL, vertices, 3, NULL, 0);
 }
 
-void core_window_draw_text(borrows massive core_window* self, f32 x, f32 y, f32 scale, char_const_span text,
+void core_window_draw_text(MUTABLE REF core_window* self, f32 x, f32 y, f32 scale, char_const_span text,
                            data_rgba color)
 {
     core_window_impl* impl = core_window_get_impl(self);
@@ -338,7 +338,7 @@ void core_window_draw_text(borrows massive core_window* self, f32 x, f32 y, f32 
     (void)SDL_SetRenderScale(impl->renderer, 1.0f, 1.0f);
 }
 
-void core_window_present(borrows massive core_window* self)
+void core_window_present(MUTABLE REF core_window* self)
 {
     core_window_impl* impl = core_window_get_impl(self);
     if (impl == NULL)

@@ -32,7 +32,7 @@ static f32 app_fps_average_ms(u64 sum_ns, u32 frames)
     return cast_f64_to_f32(cast_u64_to_f64(sum_ns) / 1e6 / cast_u32_to_f64(frames));
 }
 
-void app_fps_frame(borrows massive app_fps* self, u64 now_ns, app_fps_sample sample)
+void app_fps_frame(MUTABLE REF app_fps* self, u64 now_ns, app_fps_sample sample)
 {
     self->frames += 1;
     self->physics_ns += sample.physics_ns;
@@ -57,27 +57,27 @@ void app_fps_frame(borrows massive app_fps* self, u64 now_ns, app_fps_sample sam
     self->steps = 0;
 }
 
-f32 app_fps_value(massive const app_fps* self)
+f32 app_fps_value(REF const app_fps* self)
 {
     return self->value;
 }
 
-f32 app_fps_physics_ms(massive const app_fps* self)
+f32 app_fps_physics_ms(REF const app_fps* self)
 {
     return self->physics_ms;
 }
 
-f32 app_fps_draw_ms(massive const app_fps* self)
+f32 app_fps_draw_ms(REF const app_fps* self)
 {
     return self->draw_ms;
 }
 
-f32 app_fps_present_ms(massive const app_fps* self)
+f32 app_fps_present_ms(REF const app_fps* self)
 {
     return self->present_ms;
 }
 
-f32 app_fps_steps(massive const app_fps* self)
+f32 app_fps_steps(REF const app_fps* self)
 {
     return self->steps_per_frame;
 }

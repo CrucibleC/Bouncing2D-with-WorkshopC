@@ -21,11 +21,11 @@
 // Only xy changes per frame. Buffers grow and never shrink.
 typedef struct core_sprite_batch
 {
-    confined memory_block xy;
-    confined memory_block colors;
-    confined memory_block uv;
-    confined memory_block indices;
-    confined size_t count;   // spheres prepared
+    PRIVATE memory_block xy;
+    PRIVATE memory_block colors;
+    PRIVATE memory_block uv;
+    PRIVATE memory_block indices;
+    PRIVATE size_t count;   // spheres prepared
 } core_sprite_batch;
 
 // The arrays, for the window's draw call: count sprites, 4 * count vertices, 6 * count indices.
@@ -47,19 +47,19 @@ core_sprite_batch_view core_sprite_batch_view_pod(size_t count, const f32* xy, c
 core_sprite_batch core_sprite_batch_make(void);
 NO_COPY(core_sprite_batch);
 NO_MOVE(core_sprite_batch);
-void core_sprite_batch_destroy(borrows massive core_sprite_batch* self);
+void core_sprite_batch_destroy(MUTABLE REF core_sprite_batch* self);
 NO_RETURN(core_sprite_batch);
-bool core_sprite_batch_valid(massive const core_sprite_batch* self);
-status core_sprite_batch_status(massive const core_sprite_batch* self);
+bool core_sprite_batch_valid(REF const core_sprite_batch* self);
+status core_sprite_batch_status(REF const core_sprite_batch* self);
 
 // For new or resized spheres: grows the buffers and writes colors, uv and indices for every
 // sphere, then the positions. On failure the batch is empty (count 0)
-status core_sprite_batch_prepare(borrows massive core_sprite_batch* self, massive const core_spheres_const_view* spheres);
+status core_sprite_batch_prepare(MUTABLE REF core_sprite_batch* self, REF const core_spheres_const_view* spheres);
 // Every frame: rewrites the quads' corners from x, y and radius (at least the minimum on-screen
 // radius). Does nothing when spheres->count differs from the prepared count
-void core_sprite_batch_update(borrows massive core_sprite_batch* self, massive const core_spheres_const_view* spheres);
-size_t core_sprite_batch_count(massive const core_sprite_batch* self);
-core_sprite_batch_view core_sprite_batch_get_view(massive const core_sprite_batch* self);
+void core_sprite_batch_update(MUTABLE REF core_sprite_batch* self, REF const core_spheres_const_view* spheres);
+size_t core_sprite_batch_count(REF const core_sprite_batch* self);
+core_sprite_batch_view core_sprite_batch_get_view(REF const core_sprite_batch* self);
 
 // The smallest radius a sphere is drawn with, in pixels, so even tiny spheres stay visible
 f32 core_sprite_batch_min_radius(void);

@@ -17,7 +17,7 @@ static const u32 START_N_WINDOW = 20;
 static const u32 START_N_HEADLESS = 100;
 
 // The benchmark line: how long frames and physics steps took in real time
-static void app_log_timing(massive const app_simulation* simulation, u64 elapsed_ns)
+static void app_log_timing(REF const app_simulation* simulation, u64 elapsed_ns)
 {
     u64 frames = app_simulation_frames(simulation);
     u64 steps = app_simulation_steps(simulation);
@@ -29,7 +29,7 @@ static void app_log_timing(massive const app_simulation* simulation, u64 elapsed
 }
 
 // Runs the simulation in window until it is closed (or, headless, until the mock's frame limit)
-static status app_run_window(borrows massive core_window* window)
+static status app_run_window(MUTABLE REF core_window* window)
 {
     u32 start_n = core_window_headless() ? START_N_HEADLESS : START_N_WINDOW;
     app_simulation simulation = app_simulation_make(start_n, core_window_bounds(window));

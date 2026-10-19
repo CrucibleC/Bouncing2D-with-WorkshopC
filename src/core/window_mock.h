@@ -30,10 +30,10 @@ core_window_mock_stats core_window_mock_stats_pod(u64 frames, size_t sprites, si
                                                   u64 clears);
 
 // Queues an event for core_window_poll_event; false when the queue (64 events) is full
-bool core_window_mock_push_event(borrows massive core_window* self, data_input_event event);
-core_window_mock_stats core_window_mock_get_stats(massive const core_window* self);
+bool core_window_mock_push_event(MUTABLE REF core_window* self, data_input_event event);
+core_window_mock_stats core_window_mock_get_stats(REF const core_window* self);
 // After this many presented frames the mock sends a quit event; 0 never does
-void core_window_mock_set_frame_limit(borrows massive core_window* self, u64 frames);
+void core_window_mock_set_frame_limit(MUTABLE REF core_window* self, u64 frames);
 // The frame limit a new mock window starts with
 u64 core_window_mock_default_frames(void);
 

@@ -35,7 +35,7 @@ core_window_mock_stats core_window_mock_stats_pod(u64 frames, size_t sprites, si
     };
 }
 
-static void core_window_impl_init(initializes massive core_window_impl* self, u32 width, u32 height)
+static void core_window_impl_init(OUTPUT REF core_window_impl* self, u32 width, u32 height)
 {
     self->width = width;
     self->height = height;
@@ -50,12 +50,12 @@ static void core_window_impl_init(initializes massive core_window_impl* self, u3
     self->stats = core_window_mock_stats_pod(0, 0, 0, 0, 0);
 }
 
-static core_window_impl* core_window_get_impl(borrows massive core_window* self)
+static core_window_impl* core_window_get_impl(MUTABLE REF core_window* self)
 {
     return memory_block_data(&self->impl);
 }
 
-static const core_window_impl* core_window_get_const_impl(massive const core_window* self)
+static const core_window_impl* core_window_get_const_impl(REF const core_window* self)
 {
     return memory_block_const_data(&self->impl);
 }
@@ -83,27 +83,27 @@ core_window core_window_make(const char* title, u32 width, u32 height)
     core_window_impl* impl = core_window_get_impl(&result);
     if (impl != NULL)
     {
-        core_window_impl_init(overwrite(impl), width, height);
+        core_window_impl_init(OUT(impl), width, height);
     }
     return core_window_return(&result);
 }
 
-void core_window_destroy(borrows massive core_window* self)
+void core_window_destroy(MUTABLE REF core_window* self)
 {
     memory_block_destroy(&self->impl);
 }
 
-core_window core_window_return(borrows massive core_window* self)
+core_window core_window_return(MUTABLE REF core_window* self)
 {
     return *self;
 }
 
-bool core_window_valid(massive const core_window* self)
+bool core_window_valid(REF const core_window* self)
 {
     return memory_block_valid(&self->impl);
 }
 
-bool core_window_poll_event(borrows massive core_window* self, initializes massive data_input_event* event)
+bool core_window_poll_event(MUTABLE REF core_window* self, OUTPUT REF data_input_event* event)
 {
     *event = data_input_event_pod(DATA_INPUT_NONE, 0.0f, 0.0f);
     core_window_impl* impl = core_window_get_impl(self);
@@ -135,7 +135,7 @@ bool core_window_poll_event(borrows massive core_window* self, initializes massi
     return false;
 }
 
-data_bounds core_window_bounds(massive const core_window* self)
+data_bounds core_window_bounds(REF const core_window* self)
 {
     const core_window_impl* impl = core_window_get_const_impl(self);
     if (impl == NULL)
@@ -145,13 +145,13 @@ data_bounds core_window_bounds(massive const core_window* self)
     return data_bounds_pod(0.0f, 0.0f, cast_u32_to_f32(impl->width), cast_u32_to_f32(impl->height));
 }
 
-u64 core_window_time_ns(massive const core_window* self)
+u64 core_window_time_ns(REF const core_window* self)
 {
     const core_window_impl* impl = core_window_get_const_impl(self);
     return impl != NULL ? impl->now_ns : 0;
 }
 
-void core_window_clear(borrows massive core_window* self, data_rgba color)
+void core_window_clear(MUTABLE REF core_window* self, data_rgba color)
 {
     (void)color;
     core_window_impl* impl = core_window_get_impl(self);
@@ -161,7 +161,7 @@ void core_window_clear(borrows massive core_window* self, data_rgba color)
     }
 }
 
-void core_window_draw_sprites(borrows massive core_window* self, massive const core_sprite_batch_view* sprites)
+void core_window_draw_sprites(MUTABLE REF core_window* self, REF const core_sprite_batch_view* sprites)
 {
     core_window_impl* impl = core_window_get_impl(self);
     if (impl != NULL)
@@ -170,7 +170,7 @@ void core_window_draw_sprites(borrows massive core_window* self, massive const c
     }
 }
 
-void core_window_draw_triangle(borrows massive core_window* self, data_triangle triangle, data_rgba color)
+void core_window_draw_triangle(MUTABLE REF core_window* self, data_triangle triangle, data_rgba color)
 {
     (void)triangle;
     (void)color;
@@ -181,7 +181,7 @@ void core_window_draw_triangle(borrows massive core_window* self, data_triangle 
     }
 }
 
-void core_window_draw_text(borrows massive core_window* self, f32 x, f32 y, f32 scale, char_const_span text,
+void core_window_draw_text(MUTABLE REF core_window* self, f32 x, f32 y, f32 scale, char_const_span text,
                            data_rgba color)
 {
     (void)x;
@@ -195,7 +195,7 @@ void core_window_draw_text(borrows massive core_window* self, f32 x, f32 y, f32 
     }
 }
 
-void core_window_present(borrows massive core_window* self)
+void core_window_present(MUTABLE REF core_window* self)
 {
     core_window_impl* impl = core_window_get_impl(self);
     if (impl == NULL)
@@ -210,7 +210,7 @@ void core_window_present(borrows massive core_window* self)
     impl->now_ns += FRAME_NS;
 }
 
-bool core_window_mock_push_event(borrows massive core_window* self, data_input_event event)
+bool core_window_mock_push_event(MUTABLE REF core_window* self, data_input_event event)
 {
     core_window_impl* impl = core_window_get_impl(self);
     if (impl == NULL || impl->queue_count == CORE_WINDOW_MOCK_QUEUE_SIZE)
@@ -223,7 +223,7 @@ bool core_window_mock_push_event(borrows massive core_window* self, data_input_e
     return true;
 }
 
-core_window_mock_stats core_window_mock_get_stats(massive const core_window* self)
+core_window_mock_stats core_window_mock_get_stats(REF const core_window* self)
 {
     const core_window_impl* impl = core_window_get_const_impl(self);
     if (impl == NULL)
@@ -233,7 +233,7 @@ core_window_mock_stats core_window_mock_get_stats(massive const core_window* sel
     return impl->stats;
 }
 
-void core_window_mock_set_frame_limit(borrows massive core_window* self, u64 frames)
+void core_window_mock_set_frame_limit(MUTABLE REF core_window* self, u64 frames)
 {
     core_window_impl* impl = core_window_get_impl(self);
     if (impl != NULL)

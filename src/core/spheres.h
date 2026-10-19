@@ -19,10 +19,10 @@
 // leave every sphere zeroed, and the count changes only through core_spheres_resize.
 typedef struct core_spheres
 {
-    confined memory_block block;   // the six arrays, 24 bytes per sphere slot
-    confined size_t count;         // spheres in use; 0 when invalid
-    confined size_t stride;        // elements per array: count rounded up to a multiple of 16
-    confined u32 generation;       // bumped by resize, move (the source) and destroy: see the views
+    PRIVATE memory_block block;   // the six arrays, 24 bytes per sphere slot
+    PRIVATE size_t count;         // spheres in use; 0 when invalid
+    PRIVATE size_t stride;        // elements per array: count rounded up to a multiple of 16
+    PRIVATE u32 generation;       // bumped by resize, move (the source) and destroy: see the views
 } core_spheres;
 
 // Every array at once, count elements each, for system loops: copy the pointers into local
@@ -58,8 +58,8 @@ typedef struct core_spheres_const_view
 } core_spheres_const_view;
 
 // { count, x, y, vx, vy, radius, rgba, generation, taken_at }; made by core_spheres_get_view
-core_spheres_view core_spheres_view_pod(size_t count, borrows f32* x, borrows f32* y, borrows f32* vx,
-                                        borrows f32* vy, borrows f32* radius, borrows data_rgba* rgba,
+core_spheres_view core_spheres_view_pod(size_t count, MUTABLE f32* x, MUTABLE f32* y, MUTABLE f32* vx,
+                                        MUTABLE f32* vy, MUTABLE f32* radius, MUTABLE data_rgba* rgba,
                                         const u32* generation, u32 taken_at);
 // { count, x, y, vx, vy, radius, rgba, generation, taken_at }; made by core_spheres_get_const_view
 core_spheres_const_view core_spheres_const_view_pod(size_t count, const f32* x, const f32* y, const f32* vx,
@@ -69,36 +69,36 @@ core_spheres_const_view core_spheres_const_view_pod(size_t count, const f32* x, 
 // Whether the view still matches its spheres: false once they were resized, moved from or
 // destroyed (the arrays may have moved). Functions taking a view assert it, so Debug builds catch
 // a stale view at its first use; NDEBUG (Release) drops the asserts
-static inline bool core_spheres_view_is_current(massive const core_spheres_view* view)
+static inline bool core_spheres_view_is_current(REF const core_spheres_view* view)
 {
     return view->generation == NULL || *view->generation == view->taken_at;
 }
 
-static inline bool core_spheres_const_view_is_current(massive const core_spheres_const_view* view)
+static inline bool core_spheres_const_view_is_current(REF const core_spheres_const_view* view)
 {
     return view->generation == NULL || *view->generation == view->taken_at;
 }
 
 // count zeroed spheres; invalid (count 0) when the allocation fails
 core_spheres core_spheres_make(size_t count);
-core_spheres core_spheres_copy(massive const core_spheres* self);
-core_spheres core_spheres_move(borrows massive core_spheres* self);
-void core_spheres_destroy(borrows massive core_spheres* self);
-core_spheres core_spheres_return(borrows massive core_spheres* self);
-bool core_spheres_valid(massive const core_spheres* self);
-status core_spheres_status(massive const core_spheres* self);
+core_spheres core_spheres_copy(REF const core_spheres* self);
+core_spheres core_spheres_move(MUTABLE REF core_spheres* self);
+void core_spheres_destroy(MUTABLE REF core_spheres* self);
+core_spheres core_spheres_return(MUTABLE REF core_spheres* self);
+bool core_spheres_valid(REF const core_spheres* self);
+status core_spheres_status(REF const core_spheres* self);
 
 // Changes the count and zeroes every sphere, old and new. On failure (STATUS_OUT_OF_RANGE when
 // count is too big, or the allocation's status) the spheres are unchanged. Invalidates every view
-status core_spheres_resize(borrows massive core_spheres* self, size_t count);
-size_t core_spheres_count(massive const core_spheres* self);
+status core_spheres_resize(MUTABLE REF core_spheres* self, size_t count);
+size_t core_spheres_count(REF const core_spheres* self);
 
 // All arrays, for system loops; an empty view (count 0, NULL pointers) when invalid
-core_spheres_view core_spheres_get_view(borrows massive core_spheres* self);
-core_spheres_const_view core_spheres_get_const_view(massive const core_spheres* self);
+core_spheres_view core_spheres_get_view(MUTABLE REF core_spheres* self);
+core_spheres_const_view core_spheres_get_const_view(REF const core_spheres* self);
 
 // One whole sphere, for tests, debugging and picking; never use it in system loops.
 // false (and a zeroed sphere) when index is out of range
-bool core_spheres_get(massive const core_spheres* self, size_t index, initializes massive data_sphere* sphere);
+bool core_spheres_get(REF const core_spheres* self, size_t index, OUTPUT REF data_sphere* sphere);
 
 #endif // CORE_SPHERES_H
