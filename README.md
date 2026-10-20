@@ -3,6 +3,8 @@
 # Bouncing2D with WorkshopC
 A demo of using WorkshopC to make an app of bouncing objects.
 
+**[WorkshopC](https://github.com/CrucibleC/WorkshopC)** · **[Lowercase tags version](https://github.com/CrucibleC/Bouncing2D-with-WorkshopC/tree/main)**
+
 The point of this project is to show what a C codebase can look like when it is written with WorkshopC: explicit ownership, RAII lifetimes, null safety, and sized buffers, checked by the analyzer on every change.
 
 It is made using WorkshopC, along with its VS Code extension and its AI integration named RobotC. These tools are not part of this project and are under a different license of their own. This project's license does not cover them.
